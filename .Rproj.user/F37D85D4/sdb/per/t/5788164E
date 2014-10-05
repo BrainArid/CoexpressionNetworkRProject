@@ -1,0 +1,16 @@
+{
+    "contents" : "getTrimmedSet_UbiquitousHelper <-function(sample, lowerPercentile, upperPercentile)\n{ \n  thresholds <- quantile(sample, c(lowerPercentile, upperPercentile));\n  return(sample[thresholds[1] <= sample & sample <= thresholds[2]]);\n}",
+    "created" : 1411752298764.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "370461017",
+    "id" : "5788164E",
+    "lastKnownWriteTime" : 1411752253,
+    "path" : "C:/Users/Student/My Research/microArray v RNA Seq/CoexpressionNetworkProject/getTrimmedSet_UbiquitousHelper.R",
+    "properties" : {
+        "tempName" : "Untitled2"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
