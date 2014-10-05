@@ -1,15 +1,14 @@
 {
     "contents" : "plot2Groups <- function(GroupA, GroupB, byRow=TRUE, main=\"Mean Plot\", xlab=\"Group A\", ylab=\"Group B\", file=NA, histA=FALSE, histB=FALSE)\n{\n  if(!is.na(file))\n    png(filename=file);\n  \n  a <- hist(GroupB)\n  \n  if(histA && histB)\n  {\n    layout(matrix(c(3,1,1,1,3,1,1,1,3,1,1,1,4,2,2,2), 4, 4, byrow = TRUE));\n  }\n  else if(histA)\n  {\n    layout(matrix(c(1,1,1,2), 4, 1, byrow = TRUE));\n  }\n  else if(histB)\n  {\n    a <- hist(GroupB)\n    layout(matrix(c(2,1,1,1), 1, 4, byrow = FALSE))\n  }\n\n  \n  plot(x=GroupA, y=GroupB, main=main,xlab=xlab,ylab=ylab, type=\"n\");\n  points(x=GroupA, y=GroupB, pch=20, cex=0.5);\n  \n  \n  if(histA)\n  {\n    hist(GroupA);\n  }\n  if(histB)\n  {\n    ##hist(GroupB);\n    \n    barplot(a$counts, space=0, horiz=TRUE)\n    width <- a$breaks[2] - a$breaks[1]\n    axis(2, at=(pretty(a$breaks) - a$breaks[1])/width,labels=pretty(a$breaks))\n  }\n  \n  #if(!is.na(file))\n    dev.off();\n}",
-    "created" : 1411756521705.000,
+    "created" : 1412473145184.000,
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
     "hash" : "1303481530",
-    "id" : "EB27CDE5",
+    "id" : "F303A523",
     "lastKnownWriteTime" : 1409336108,
-    "path" : "C:/Users/Student/My Research/microArray v RNA Seq/CoexpressionNetworkProject/plot2Groups.R",
+    "path" : "C:/Users/Student/My Research/microArray v RNA Seq/CoexpressionNetworkRProject/plot2Groups.R",
     "properties" : {
-        "tempName" : "Untitled2"
     },
     "source_on_save" : false,
     "type" : "r_source"

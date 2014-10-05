@@ -1,13 +1,13 @@
 {
     "contents" : "ubiquitousNormalize <- function(data, lowerPercentile, upperPercentile)\n{\n  source(\"getUbiquitousGeneSet.R\");\n  \n  ubiquitousGenes <- getUbiquitousGeneSet(data, lowerPercentile, upperPercentile);\n  ubiData <- data[ubiquitousGenes,];\n  \n  #calculate average total counts\n  counts <- vector(length=dim(data)[2]);\n  for(i in 1:length(counts))\n  {\n    counts[i] <- sum(ubiData[,i])\n  }\n  meanCount <- mean(counts);\n  for(i in 1:length(counts))\n  {\n    data[,i] <- data[,i] * (meanCount / counts[i]);\n  }\n  \n  return(data);\n}",
-    "created" : 1411752312619.000,
+    "created" : 1412473193929.000,
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
     "hash" : "680533207",
-    "id" : "A66FF69D",
+    "id" : "8A3BB145",
     "lastKnownWriteTime" : 1411753805,
-    "path" : "C:/Users/Student/My Research/microArray v RNA Seq/CoexpressionNetworkProject/ubiquitousNormalize.R",
+    "path" : "C:/Users/Student/My Research/microArray v RNA Seq/CoexpressionNetworkRProject/ubiquitousNormalize.R",
     "properties" : {
     },
     "source_on_save" : false,
