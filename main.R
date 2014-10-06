@@ -3,11 +3,21 @@ print("Setting workingDirectory");
 #for(wd in workingDirectories)
 #  setwd(wd);
 
+print(paste("Current working directory: ", getwd()));
+print("Changing Current working directory.")
+
 #setwd("C:/Users/Student/My Research/microArray v RNA Seq/");
+setwd("/home/barand/microArray_v_RNASeq/")
+
+print(paste("Current working directory: ", getwd()));
+
 source("http://bioconductor.org/biocLite.R");
 
 #read in arguments
+print("Reading in command line arguments.");
 args <- commandArgs(trailingOnly = TRUE);
+print(paste("commandArgs: ",args));
+
 if(length(args) > 0)
 {
   #Parse arguments (we expec the form --argName=argValue)
@@ -92,9 +102,12 @@ countData <- mapply(x=as.matrix(c(rsConData, rsCanData)), FUN=as.integer);
 row.names(countData) <- row.names(rsConData);
 
 #normalize
+print("Begin normalization:")
+
 #RMKM
 if(args$normFlagRPKM)
 {
+  print("RPKM normalization:")
   source("http://bioconductor.org/biocLite.R")
   biocLite("easyRNASeq")
   library("easyRNASeq")
@@ -139,6 +152,7 @@ if(args$normFlagRPKM)
 #DESeq variance stableizing transformation (VST) normalization
 if(args$normFlagDESeq)
 {
+  print("DESeq normalization:");
   source("http://bioconductor.org/biocLite.R");
   biocLite("DESeq2");
   library("DESeq2");
@@ -176,6 +190,7 @@ if(args$normFlagDESeq)
 #total ubiquetous normalization as per "Optimal scaling of Digital Transcriptomes" By Glusman et al.
 if(args$normFlagUbi)
 {
+  print("Total ubiquitous normalization:");
   #setwd("CoexpressionNetworkProject/")
   source("CoexpressionNetworkRProject/ubiquitousNormalize.R");
   source("CoexpressionNetworkRProject/getUbiquitousGeneSet.R");
@@ -187,6 +202,7 @@ if(args$normFlagUbi)
 #quantile
 if(args$normFlagQuant)
 {
+  print("Quantile normalization:");
   source('http://bioconductor.org/biocLite.R');
   biocLite('preprocessCore');
   #load package
@@ -202,6 +218,8 @@ if(args$normFlagQuant)
 
 if(args$diffExprsFlaq)
 {
+  print("Gene Differential Expression:");
+  
   #microarray differential expression
   #may not be working... produces rediculously small p-values
   source("http://bioconductor.org/biocLite.R");
@@ -248,6 +266,7 @@ if(args$diffExprsFlag)
   subBySig <- FALSE;
   if(subBySig)
   {
+    print("Filtering genes by significance:");
     cutoff<- 0.0000001;
     filter <- efit.p.adj<cutoff & !is.na(efit.p.adj);
     maGenes<- as.matrix(cbind(efit.p.adj[filter], maConData[filter,],maCanData[filter,]));#attach adjusted p value now
@@ -256,6 +275,7 @@ if(args$diffExprsFlag)
   }
   else #subset by rank top X most significant
   {
+    print("Filtering genes by fold-change:")
     cutoff <- 12000;
     filter <- rank(efit.p.adj)<=cutoff & !is.na(efit.p.adj);
     maGenes<- as.matrix(cbind(efit.p.adj[filter], maConData[filter,],maCanData[filter,]));#attach adjusted p value now
@@ -281,6 +301,7 @@ if(args$diffExprsFlag)
 }
 else
 {
+  print("No gene filtering performed.")
   maGenes <- cbind(maConData, maCanData);
   rsGenes <- cbind(rsConData_norm_DESeq2,rsCanData_norm_DESeq2);
   cutoff <- "allGenes";
@@ -288,6 +309,8 @@ else
 
 if(args$QCFlag)
 {
+  print("Outputing quality control figures:");
+  
   maRankData<-apply(maGenes,MARGIN=2,FUN=rank);
   rsRankData<-apply(rsGenes,MARGIN=2,FUN=rank);
   
@@ -333,6 +356,7 @@ if(args$QCFlag)
 
 #calculated correlation statistics
 print("Constructing correlation matricies");
+print("Calculating Microarray correlation matrix:");
 maPearson <- cor(x=t(maGenes), method="pearson", use="complete.obs");
 maPearson_hist <- hist(x=maPearson,breaks=100,plot=FALSE);
 write.csv(x=maPearson,file=paste("Data/BRCA/maPearson_",cutoff,"_int.txt"));
@@ -341,6 +365,7 @@ if(!args$diffCoexFlag)
   rm(maPearson);
 }
 
+print("Calculating RNASeq DESeq correlation matrix:");
 rsPearson_DESeq <- cor(x=t(rsGenes), method="pearson", use="complete.obs");
 rsPearson_DESeq_hist <- hist(x=rsPearson_DESeq,breaks=100,plot=FALSE);
 write.csv(x=rsPearson_DESeq,file=paste("Data/BRCA/rsPearson_",cutoff,"_int.txt"));
@@ -349,24 +374,29 @@ if(!args$diffCoexFlag)
   rm(rsPearson_DESeq);
 }
 
+print("Calculating RNASeq Quantile correlation matrix:");
 rsPearson_quant <- cor(x=t(rsData_quant), method="pearson", use="complete.obs");
 rsPearson_quant_hist <- hist(x=rsPearson_quant,breaks=100,plot=FALSE);
 rm(rsPearson_quant);
 
+print("Calculating RNASeq Total Ubiquitous correlation matrix:");
 rsPearson_Ubi <- cor(x=t(rsData_Ubi), method="pearson", use="complete.obs");
 rsPearson_Ubi_hist <- hist(x=rsPearson_Ubi,breaks=100,plot=FALSE);
 write.csv(x=rsPearson_Ubi,file=paste("Data/BRCA/rsPearson_top12000_int.txt"));
 rm(rsPearson_Ubi);
 
+print("Calculating RNASeq Raw correlation matrix:");
 rsPearson_raw <- cor(x=t(countData), method="pearson", use="complete.obs");
 rsPearson_raw_hist <- hist(x=rsPearson_raw,breaks=100,plot=FALSE);
 rm(rsPearson_raw);
 
+print("Calculating RNASeq RPKM correlation matrix:");
 rsPearson_RPKM <- cor(x=t(rsData_RPKM), method="pearson", use="complete.obs");
 rsPearson_RPKM_hist <- hist(x=rsPearson_RPKM,breaks=100,plot=FALSE);
 rm(rsPearson_RPKM);
 
 #plot overlapping histogram of PCC
+print("Outputting comparative PCC histogram:");
 maxy <- 0.08
 # Density plots
 library("ggplot2")
@@ -404,21 +434,24 @@ rm(PCC_density_data);
 
 if(args$diffCoexFlaq)
 {
+  print("Calculating differential coexpression network.");
   diffPearson <- rsPearson - maPearson
   write.csv(x=diffPearson,file=paste("Data/BRCA/diffPearson.txt"));
 
-  output venn diagram gene-edge lists
+  #output venn diagram gene-edge lists
 }
 
 #create iGraph and plot
 library("igraph")
 
+print("Outputting microArray coexpression matrix");
 write.csv(x=maPearson,file=paste("Data/BRCA/maPearson_intersection_", cutoff, ".txt"));
 range(maPearson);
 png(filename=paste("Data/BRCA/maPearsonHist_intersection_", cutoff, ".png"));
 hist(x=maPearson,breaks=20);
 dev.off();
 
+print("Constructing microArray iGraph.");
 maGraph <-graph.adjacency(adjmatrix=maPearson*1000,mode="undirected", weighted=TRUE);
 #add vertex attributes to graph
 for(i in 1:length(V(maGraph)))
@@ -428,16 +461,19 @@ for(i in 1:length(V(maGraph)))
   V(maGraph)[i]$p <- efit.p.adj[name];
 }
 
+print("Outputting microArray iGraph.");
 write.graph(maGraph, file=paste("maGraph_", cutoff, ".graphml"), format="graphml" );
 rm(maGraph);
 rm(maPearson);
 
+print("Outputting RNASeq coexpression matrix");
 write.table(x=rsPearson,file=paste("Data/BRCA/rsPearson_intersection_", cutoff, ".txt"));
 range(rsPearson);
 png(filename=paste("Data/BRCA/rsPearsonHist_intersection_", cutoff, ".png"));
 hist(x=rsPearson,breaks=20);
 dev.off();
 
+print("Constructing RNASeq iGraph.");
 rsGraph <-graph.adjacency(adjmatrix=rsPearson*1000,mode="undirected", weighted=TRUE);
 for(i in 1:length(V(rsGraph)))
 {
@@ -446,19 +482,31 @@ for(i in 1:length(V(rsGraph)))
   V(rsGraph)[i]$p <- res[name,]$padj;
 }
 
+print("Outputting RNASeq iGraph");
 write.graph(rsGraph, file=paste("rsGraph_", cutoff, ".graphml"), format="graphml" );
 rm(rsGraph);
 rm(rsPearson);
 
 if(args$diffCoexFlag)
 {
+  print("Outputting differential coexpression matrix");
   write.csv(x=diffPearson,file=paste("Data/BRCA/diffPearson_intersection_", cutoff, ".txt"));
   range(diffPearson);
   png(filename=paste("Data/BRCA/diffPearsonHist_intersection_", cutoff, ".png"));
   hist(x=maPearson,breaks=20);
   dev.off();
   
+  print("Constructing differential coexpression iGraph");
   diffGraph <-graph.adjacency(adjmatrix=diffPearson*1000,mode="undirected", weighted=TRUE);
+  for(i in 1:length(V(diffGraph)))
+  {
+    name <- V(diffGraph)[i]$name;
+    V(diffGraph)[i]$RS_fc <- rsFC[name];
+    V(diffGraph)[i]$RS_p <- res[name,]$padj;
+    V(diffGraph)[i]$MA_fc <- maFC[name];
+    V(diffGraph)[i]$MA_p <- efit.p.adj[name];
+  }
+  print("Outputting differential coexpression iGraph");
   write.graph(diffGraph, file=paste("diffGraph_", cutoff, ".graphml"), format="graphml" );
   rm(diffGraph);
   rm(diffPearson);
