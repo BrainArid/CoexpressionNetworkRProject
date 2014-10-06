@@ -1,4 +1,7 @@
-print("Setting workingDirectory");
+#Coexpression Network Project main script
+#By: Brian Arand
+#September 2014
+
 #workingDirectories <- c("/home/barand/microArray_v_RNASeq/","C:/Users/Student/My Research/microArray v RNA Seq/");
 #for(wd in workingDirectories)
 #  setwd(wd);
@@ -11,7 +14,7 @@ setwd("/home/barand/microArray_v_RNASeq/")
 
 print(paste("Current working directory: ", getwd()));
 
-source("http://bioconductor.org/biocLite.R");
+#source("http://bioconductor.org/biocLite.R");
 
 #read in arguments
 print("Reading in command line arguments.");
