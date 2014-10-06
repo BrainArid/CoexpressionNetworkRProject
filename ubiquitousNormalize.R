@@ -1,6 +1,6 @@
 ubiquitousNormalize <- function(data, lowerPercentile, upperPercentile)
 {
-  source("getUbiquitousGeneSet.R");
+  #source("getUbiquitousGeneSet.R");
   
   ubiquitousGenes <- getUbiquitousGeneSet(data, lowerPercentile, upperPercentile);
   ubiData <- data[ubiquitousGenes,];

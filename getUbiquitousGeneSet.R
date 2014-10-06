@@ -1,6 +1,6 @@
 getUbiquitousGeneSet <-function(samples, lowerPercentile, upperPercentile)
 { 
-  source("getTrimmedSet_UbiquitousHelper.R")
+  #source("getTrimmedSet_UbiquitousHelper.R")
   i<-1;
   sample <- samples[,i];
   geneSet <- getTrimmedSet_UbiquitousHelper(sample, lowerPercentile, upperPercentile);

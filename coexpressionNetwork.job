@@ -10,7 +10,7 @@
 cd ~/microArray_v_RNASeq
 module load R-3.0.2
 
-SCRIPT_DIR="CoexpressionNetworkProject/"
+SCRIPT_DIR="CoexpressionNetworkRProject/"
 #DATA_DIR="Data/"
 
 cd $PBS_O_WORKDIR
@@ -20,6 +20,6 @@ cd $PBS_O_WORKDIR
 
 
 
-R CMD BATCH ${SCRIPT_DIR}main.R out.dat
+R CMD BATCH --args ${ARGS} < ${SCRIPT_DIR}main.R > out.Rout
 
 #cp out.dat $PBS_O_WORKDIR
