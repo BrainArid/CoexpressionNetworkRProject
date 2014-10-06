@@ -13,13 +13,13 @@ module load R-3.0.2
 SCRIPT_DIR="CoexpressionNetworkRProject/"
 #DATA_DIR="Data/"
 
-cd $PBS_O_WORKDIR
+#cd $PBS_O_WORKDIR
 #cp ${SCRIPT_DIR}*.R $TMPDIR
 #cp
 #cd $TMPDIR
 
 
-
-R CMD BATCH --args ${ARGS} < ${SCRIPT_DIR}main.R > out.Rout
+Rscript ${SCRIPT_DIR}main.R ${ARGS} > out.Rout
+#R CMD BATCH --args ${ARGS} < ${SCRIPT_DIR}main.R > out.Rout
 
 #cp out.dat $PBS_O_WORKDIR
