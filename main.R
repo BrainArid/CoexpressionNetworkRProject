@@ -131,7 +131,7 @@ if(args$normFlagRPKM)
       exons = reduce(exons)
       sum( width(exons) )
     })
-    return as.numberic(egs);
+    return (as.numberic(egs));
   }
   rpkm <- function(expMatrix)
   {
