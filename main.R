@@ -111,7 +111,7 @@ print("Begin normalization:")
 if(args$normFlagRPKM)
 {
   print("RPKM normalization:")
-  source("http://bioconductor.org/biocLite.R")
+  #source("http://bioconductor.org/biocLite.R")
   biocLite("easyRNASeq")
   library("easyRNASeq")
   
@@ -156,7 +156,7 @@ if(args$normFlagRPKM)
 if(args$normFlagDESeq)
 {
   print("DESeq normalization:");
-  source("http://bioconductor.org/biocLite.R");
+  #source("http://bioconductor.org/biocLite.R");
   biocLite("DESeq2");
   library("DESeq2");
 
@@ -225,7 +225,7 @@ if(args$diffExprsFlaq)
   
   #microarray differential expression
   #may not be working... produces rediculously small p-values
-  source("http://bioconductor.org/biocLite.R");
+  #source("http://bioconductor.org/biocLite.R");
   biocLite( "limma");
   library("limma");
   
