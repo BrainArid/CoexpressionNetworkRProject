@@ -14,7 +14,7 @@ setwd("/home/barand/microArray_v_RNASeq/")
 
 print(paste("Current working directory: ", getwd()));
 
-#source("http://bioconductor.org/biocLite.R");
+source("http://bioconductor.org/biocLite.R");
 
 #read in arguments
 print("Reading in command line arguments.");
