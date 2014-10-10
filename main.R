@@ -5,6 +5,8 @@
 #workingDirectories <- c("/home/barand/microArray_v_RNASeq/","C:/Users/Student/My Research/microArray v RNA Seq/");
 #for(wd in workingDirectories)
 #  setwd(wd);
+print("Library Paths:");
+.libPath();
 
 print(paste("Current working directory: ", getwd()));
 print("Changing Current working directory.")
