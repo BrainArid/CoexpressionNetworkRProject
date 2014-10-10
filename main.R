@@ -6,7 +6,7 @@
 #for(wd in workingDirectories)
 #  setwd(wd);
 print("Library Paths:");
-.libPath();
+.libPaths();
 
 print(paste("Current working directory: ", getwd()));
 print("Changing Current working directory.")
