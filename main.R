@@ -110,6 +110,7 @@ if(args$dataFromRDS)
   sharedGenes <- intersect(row.names(Data$ma), row.names(Data$rs_raw));
   Data$ma <- Data$ma[sharedGenes,];
   Data$rs_raw <- Data$rs_raw[sharedGenes,];
+  
   remove(sharedGenes);
   
   Data$rs_raw <- matrix(data=mapply(x=as.matrix(Data$rs_raw), FUN=as.integer),nrow = dim(Data$rs_raw)[1],ncol=dim(Data$rs_raw)[2],dimnames = list(row.names(Data$rs_raw), colnames(Data$rs_raw)));
@@ -391,6 +392,8 @@ for(method in c("pearson","spearman"))
     density=c(density_data$density, profile$hist$counts/sum(profile$hist$counts)),
     method=c(density_data$method, rep(x = name, times=length(profile$hist$counts))),stringsAsFactors=FALSE);
     profile$corrMat<-NULL;
+    print(paste("\tTotal Hist counts: ", sum(profile$hist$counts)))
+    print(paste("\tNum genes: ", dim(Data[[i]])[1]))
   }
   
   Data$conCount<-tempConCount
