@@ -39,8 +39,7 @@ initializeBooleanArg <- function(arg, default){
   if(is.null(arg))
   {
     arg <- default;
-  }
-  else if(is.character(arg))
+  } else if(is.character(arg))
   {
     arg <- as.logical(arg);
   }
@@ -71,8 +70,7 @@ if(args$dataFromRDS)
 {
   print("Reading normalization.RDS");
   Data <- readRDS("normalization.RDS");
-}
-else
+} else
 {
   print("Reading original TCGA data");
   maControlFiles <- paste(sep='', maDir ,as.character(metaData[metaData[,"control"] & metaData[,"Platform.Type"]=="Expression-Genes" ,"File.Name"]));
@@ -284,8 +282,7 @@ if(args$diffExprsFlag)
     maGenes<- as.matrix(cbind(efit.p.adj[filter], Data$ma[filter,]));#attach adjusted p value now
     filter <- res$padj<cutoff & !is.na(res$padj);
     rsGenes<- as.matrix(cbind(res$padj[filter], Data$rs_DESeq[filter,]));#attach adjusted p value now
-  }
-  else #subset by rank top X most significant
+  } else #subset by rank top X most significant
   {
     print("Filtering genes by fold-change:")
     cutoff <- 12000;
@@ -310,8 +307,7 @@ if(args$diffExprsFlag)
   #remove p.values from Gene lists
   maGenes <- maGenes[,-1];
   rsGenes <- rsGenes[,-1];
-}
-else
+} else
 {
   print("No gene filtering performed.")
   maGenes <- Data$ma;
