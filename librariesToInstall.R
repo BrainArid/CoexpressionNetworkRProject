@@ -11,3 +11,4 @@ biocLite('preprocessCore');
 biocLite("limma");
 install.packages("igraph", repos="http://cran.r-project.org")
 install.packages("ggplot", repos="http://cran.r-project.org")
+install.packages("ggplot2", repos="http://cran.r-project.org"))
