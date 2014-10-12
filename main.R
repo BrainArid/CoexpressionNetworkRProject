@@ -69,10 +69,12 @@ metaData[,6] <- gsub(pattern="-",replacement=".", x=metaData[,6]);#replace '-' w
 
 if(args$dataFromRDS)
 {
+  print("Reading normalization.RDS");
   Data <- readRDS("normalization.RDS")
 }
 else
 {
+  print("Reading original TCGA data");
   maControlFiles <- paste(sep='', maDir ,as.character(metaData[metaData[,"control"] & metaData[,"Platform.Type"]=="Expression-Genes" ,"File.Name"]));
   maCancerFiles <- paste(sep='', maDir ,as.character(metaData[!metaData[,"control"] & metaData[,"Platform.Type"]=="Expression-Genes" ,"File.Name"]));
   rsControlFiles <- paste(sep='', rsDir ,as.character(metaData[metaData[,"control"] & metaData[,"Platform.Type"]=="RNASeqV2" & grepl(x=metaData[,"File.Name"], pattern="*.rsem.genes.results") ,"File.Name"]));
@@ -208,7 +210,7 @@ if(args$normFlagUbi && is.null(Data$rs_Ubi))
 }
 
 #quantile
-if(args$normFlagQuant && Data$rs_quant == NULL)
+if(args$normFlagQuant && is.null(Data$rs_quant))
 {
   print("Quantile normalization:");
   source('http://bioconductor.org/biocLite.R');
