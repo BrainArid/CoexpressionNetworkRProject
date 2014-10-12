@@ -223,7 +223,7 @@ if(args$normFlagQuant && is.null(Data$rs_quant))
 
 if(args$saveNormalizationRDS)
 {
-  saveRDS(data, file="normalization.RDS")
+  saveRDS(Data, file="normalization.RDS")
 }
 
 if(args$diffExprsFlag)
