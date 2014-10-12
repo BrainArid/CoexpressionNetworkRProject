@@ -54,6 +54,8 @@ args$normFlagUbi <- initializeBooleanArg(arg=args$normFlagUbi, default=TRUE);
 args$normFlagDESeq <- initializeBooleanArg(arg=args$normFlagDESeq, default=TRUE);
 args$normFlagQuant <- initializeBooleanArg(arg=args$normFlagQuant, default=TRUE);
 args$QCFlag <- initializeBooleanArg(arg=args$QCFlag, default=FALSE);
+args$dataFromRDS <- initializeBooleanArg(arg=args$dataFromRDS, default=FALSE);
+args$saveNormalizationRDS <- initializeBooleanArg(arg=args$saveNormalizationRDS, default=FALSE);
 
 #import data
 print("Importing data files.");
@@ -65,47 +67,58 @@ metaData <- read.table(file="Data/BRCA/Batch 47/file_manifest.txt",header=TRUE,s
 metaData <- cbind(metaData, control=(substr(x=metaData[,5],start=14,stop=16)=='11'));#addControl bool
 metaData[,6] <- gsub(pattern="-",replacement=".", x=metaData[,6]);#replace '-' with '.' to make mapping easier later
 
-maControlFiles <- paste(sep='', maDir ,as.character(metaData[metaData[,"control"] & metaData[,"Platform.Type"]=="Expression-Genes" ,"File.Name"]));
-maCancerFiles <- paste(sep='', maDir ,as.character(metaData[!metaData[,"control"] & metaData[,"Platform.Type"]=="Expression-Genes" ,"File.Name"]));
-rsControlFiles <- paste(sep='', rsDir ,as.character(metaData[metaData[,"control"] & metaData[,"Platform.Type"]=="RNASeqV2" & grepl(x=metaData[,"File.Name"], pattern="*.rsem.genes.results") ,"File.Name"]));
-rsCancerFiles <- paste(sep='', rsDir ,as.character(metaData[!metaData[,"control"] & metaData[,"Platform.Type"]=="RNASeqV2" & grepl(x=metaData[,"File.Name"], pattern="*.rsem.genes.results") ,"File.Name"]));
-
-source("CoexpressionNetworkRProject/constructCrossSampleFrame.R");
-Data <- list();
-Data$ma_con <- constructCrossSampleFrame(inFiles=maControlFiles,rows2Ignore=c(1));
-Data$ma_can <- constructCrossSampleFrame(inFiles=maCancerFiles,rows2Ignore=c(1));
-Data$rs_con <- constructCrossSampleFrame(inFiles=rsControlFiles,cols2Ignore=c(3,4));
-Data$rs_can <- constructCrossSampleFrame(inFiles=rsCancerFiles,cols2Ignore=c(3,4));
-
-Data$ma <- cbind(Data$ma_con, Data$ma_can);
-Data$rs_raw <- cbind(Data$rs_con, Data$rs_can);
-conCount <- dim(Data$ma_con)[2];
-canCount <- dim(Data$ma_can)[2];
-
-Data$ma_con <- NULL;
-Data$ma_can <- NULL;
-Data$rs_con <- NULL;
-Data$rs_can <- NULL;
-
-rm(maControlFiles, maCancerFiles, rsControlFiles, rsCancerFiles);
-
-#take intersection of genes between micro array and rnaseq set
-print("Calculating intersection of genes.");
-source("CoexpressionNetworkRProject/trim_TCGA_RNASeq_GeneNames.R");
-Data$rs_raw <- trim_TCGA_RNASeq_GeneNames(Data$rs_raw);
-
-sharedGenes <- intersect(row.names(Data$ma), row.names(Data$rs_raw));
-Data$ma <- Data$ma[sharedGenes,];
-Data$rs_raw <- Data$rs_raw[sharedGenes,];
-remove(sharedGenes);
-
-Data$rs_raw <- matrix(data=mapply(x=as.matrix(Data$rs_raw), FUN=as.integer),nrow = dim(Data$rs_raw)[1],ncol=dim(Data$rs_raw)[2],dimnames = list(row.names(Data$rs_raw), colnames(Data$rs_raw)));
-
+if(args$dataFromRDS)
+{
+  Data <- readRDS("normalization.RDS")
+}
+else
+{
+  maControlFiles <- paste(sep='', maDir ,as.character(metaData[metaData[,"control"] & metaData[,"Platform.Type"]=="Expression-Genes" ,"File.Name"]));
+  maCancerFiles <- paste(sep='', maDir ,as.character(metaData[!metaData[,"control"] & metaData[,"Platform.Type"]=="Expression-Genes" ,"File.Name"]));
+  rsControlFiles <- paste(sep='', rsDir ,as.character(metaData[metaData[,"control"] & metaData[,"Platform.Type"]=="RNASeqV2" & grepl(x=metaData[,"File.Name"], pattern="*.rsem.genes.results") ,"File.Name"]));
+  rsCancerFiles <- paste(sep='', rsDir ,as.character(metaData[!metaData[,"control"] & metaData[,"Platform.Type"]=="RNASeqV2" & grepl(x=metaData[,"File.Name"], pattern="*.rsem.genes.results") ,"File.Name"]));
+  
+  source("CoexpressionNetworkRProject/constructCrossSampleFrame.R");
+  Data <- list();
+  Data$ma_con <- constructCrossSampleFrame(inFiles=maControlFiles,rows2Ignore=c(1));
+  Data$ma_can <- constructCrossSampleFrame(inFiles=maCancerFiles,rows2Ignore=c(1));
+  Data$rs_con <- constructCrossSampleFrame(inFiles=rsControlFiles,cols2Ignore=c(3,4));
+  Data$rs_can <- constructCrossSampleFrame(inFiles=rsCancerFiles,cols2Ignore=c(3,4));
+  
+  if(is.null(Data$ma))
+  {
+    Data$ma <- cbind(Data$ma_con, Data$ma_can);
+  }
+  if(is.null(Data$rs_raw))
+  {
+    Data$rs_raw <- cbind(Data$rs_con, Data$rs_can);
+    source("CoexpressionNetworkRProject/trim_TCGA_RNASeq_GeneNames.R");
+    Data$rs_raw <- trim_TCGA_RNASeq_GeneNames(Data$rs_raw);
+  }
+  Data$conCount <- dim(Data$ma_con)[2];
+  Data$canCount <- dim(Data$ma_can)[2];
+  
+  Data$ma_con <- NULL;
+  Data$ma_can <- NULL;
+  Data$rs_con <- NULL;
+  Data$rs_can <- NULL;
+  
+  rm(maControlFiles, maCancerFiles, rsControlFiles, rsCancerFiles);
+  
+  #take intersection of genes between micro array and rnaseq set
+  print("Calculating intersection of genes.");
+  sharedGenes <- intersect(row.names(Data$ma), row.names(Data$rs_raw));
+  Data$ma <- Data$ma[sharedGenes,];
+  Data$rs_raw <- Data$rs_raw[sharedGenes,];
+  remove(sharedGenes);
+  
+  Data$rs_raw <- matrix(data=mapply(x=as.matrix(Data$rs_raw), FUN=as.integer),nrow = dim(Data$rs_raw)[1],ncol=dim(Data$rs_raw)[2],dimnames = list(row.names(Data$rs_raw), colnames(Data$rs_raw)));
+}
 #normalize
 print("Begin normalization:")
 
 #RMKM
-if(args$normFlagRPKM)
+if(args$normFlagRPKM && is.null(Data$rs_RPKM))
 {
   print("RPKM normalization:")
   #source("http://bioconductor.org/biocLite.R")
@@ -150,14 +163,14 @@ if(args$normFlagRPKM)
 }
 
 #DESeq variance stableizing transformation (VST) normalization
-if(args$normFlagDESeq)
+if(args$normFlagDESeq && is.null(Data$rs_DESeq))
 {
   print("DESeq normalization:");
   #source("http://bioconductor.org/biocLite.R");
   biocLite("DESeq2");
   library("DESeq2");
 
-  colData <- DataFrame(condition=c(rep(x="control",times=conCount), rep(x="cancer", times=canCount)), type=c(rep(x="single-read",times=conCount+canCount)));
+  colData <- DataFrame(condition=c(rep(x="control",times=Data$conCount), rep(x="cancer", times=Data$canCount)), type=c(rep(x="single-read",times=Data$conCount+Data$canCount)));
   #row.names(colData) <- colnames(countData);
   dds <- DESeqDataSetFromMatrix(countData=matrix(data=mapply(x=as.matrix(Data$rs_raw), FUN=as.integer),nrow = dim(Data$rs_raw)[1],ncol=dim(Data$rs_raw)[2],dimnames = list(row.names(Data$rs_raw), colnames(Data$rs_raw))), design = ~ condition,colData=colData);
   dds <- DESeq(dds);
@@ -183,7 +196,7 @@ if(args$normFlagDESeq)
 #library("edgeR")
 
 #total ubiquetous normalization as per "Optimal scaling of Digital Transcriptomes" By Glusman et al.
-if(args$normFlagUbi)
+if(args$normFlagUbi && is.null(Data$rs_Ubi))
 {
   print("Total ubiquitous normalization:");
   #setwd("CoexpressionNetworkProject/")
@@ -195,7 +208,7 @@ if(args$normFlagUbi)
 }
 
 #quantile
-if(args$normFlagQuant)
+if(args$normFlagQuant && Data$rs_quant == NULL)
 {
   print("Quantile normalization:");
   source('http://bioconductor.org/biocLite.R');
@@ -208,6 +221,11 @@ if(args$normFlagQuant)
   Data$rs_quant <- normalize.quantiles(x= Data$rs_raw, copy=TRUE);
 }
 
+if(args$saveNormalizationRDS)
+{
+  saveRDS(data, file="normalizationData.rds")
+}
+
 if(args$diffExprsFlag)
 {
   print("Gene Differential Expression:");
@@ -218,7 +236,7 @@ if(args$diffExprsFlag)
   biocLite("limma");
   library("limma");
   
-  condition=c(rep(x="control",times=conCount), rep(x="cancer", times=canCount));
+  condition=c(rep(x="control",times=Data$conCount), rep(x="cancer", times=Data$canCount));
   combn <- factor(paste(pData(phenoData)[,1], pData(phenoData)[,2], sep = "_"));
   design <- model.matrix(~condition);# describe model to be fit
   
@@ -321,19 +339,19 @@ if(args$QCFlag)
   boxplot(x=Data$ma,names=seq(1,dim(Data$ma)[2]), outcex=0.5, outpch=20, main="Patient box plots", xlab="Patient", ylab="expression value");
   dev.off();
   png(filename="RNASeq Count normalization check.png");
-  boxplot(x=log(Data$rs_raw),names=seq(1,conCount+canCount), outcex=0.5, outpch=20, main="Patient box plots", xlab="Patient", ylab="log RNA seq counts");
+  boxplot(x=log(Data$rs_raw),names=seq(1,Data$conCount+Data$canCount), outcex=0.5, outpch=20, main="Patient box plots", xlab="Patient", ylab="log RNA seq counts");
   dev.off();
   png(filename="RNASeq RPKM normalization check.png");
-  boxplot(x=log(Data$rs_RPKM),names=seq(1,conCount+canCount), outcex=0.5, outpch=20, main="Patient box plots", xlab="Patient", ylab="log RNA seq RPKM");
+  boxplot(x=log(Data$rs_RPKM),names=seq(1,Data$conCount+Data$canCount), outcex=0.5, outpch=20, main="Patient box plots", xlab="Patient", ylab="log RNA seq RPKM");
   dev.off();
   png(filename="RNASeq DESeq normalization check.png");
-  boxplot(x=log(Data$rs_DESeq),names=seq(1,conCount+canCount), outcex=0.5, outpch=20, main="Patient box plots", xlab="Patient", ylab="log RNA seq DESeq normalized");
+  boxplot(x=log(Data$rs_DESeq),names=seq(1,Data$conCount+Data$canCount), outcex=0.5, outpch=20, main="Patient box plots", xlab="Patient", ylab="log RNA seq DESeq normalized");
   dev.off();
   png(filename="RNASeq quantile normalization check.png");
-  boxplot(x=log(Data$rs_quant),names=seq(1,conCount+canCount), outcex=0.5, outpch=20, main="Patient box plots", xlab="Patient", ylab="log RNA seq quan normalized");
+  boxplot(x=log(Data$rs_quant),names=seq(1,Data$conCount+Data$canCount), outcex=0.5, outpch=20, main="Patient box plots", xlab="Patient", ylab="log RNA seq quan normalized");
   dev.off();
   png(filename="RNASeq total ubiquitous normalization check.png");
-  boxplot(x=log(Data$rs_Ubi),names=seq(1,conCount+canCount), outcex=0.5, outpch=20, main="Patient box plots", xlab="Patient", ylab="log RNA seq total ubiquitous normalized");
+  boxplot(x=log(Data$rs_Ubi),names=seq(1,Data$conCount+Data$canCount), outcex=0.5, outpch=20, main="Patient box plots", xlab="Patient", ylab="log RNA seq total ubiquitous normalized");
   dev.off();
 }
 
