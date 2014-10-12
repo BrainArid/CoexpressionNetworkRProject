@@ -379,6 +379,7 @@ for(method in c("pearson","spearman"))
   tempCanCount <- Data$canCount
   Data$conCount<-NULL
   Data$canCount<-NULL
+  Data$rs_RPKM<-NULL#############TEMP remove this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   
   for(i in 1:length(Data))
   {
