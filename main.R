@@ -70,7 +70,7 @@ metaData[,6] <- gsub(pattern="-",replacement=".", x=metaData[,6]);#replace '-' w
 if(args$dataFromRDS)
 {
   print("Reading normalization.RDS");
-  Data <- readRDS("normalization.RDS")
+  Data <- readRDS("normalization.RDS");
 }
 else
 {
@@ -225,7 +225,7 @@ if(args$normFlagQuant && is.null(Data$rs_quant))
 
 if(args$saveNormalizationRDS)
 {
-  saveRDS(data, file="normalizationData.rds")
+  saveRDS(data, file="normalization.RDS")
 }
 
 if(args$diffExprsFlag)
