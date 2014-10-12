@@ -374,6 +374,11 @@ for(method in c("pearson","spearman"))
   print("Calculating Microarray correlation matrix:");
   
   density_data <- data.frame();
+  #temporarily move Data$conCount and Data$canCount
+  tempConCount <- Data$conCount
+  tempCanCount <- Data$canCount
+  Data$conCount<-NULL
+  Data$canCount<-NULL
   
   for(i in 1:length(Data))
   {
@@ -385,6 +390,10 @@ for(method in c("pearson","spearman"))
     method=c(density_data$method, rep(x = name, times=length(profile$hist$counts))),stringsAsFactors=FALSE);
     profile$corrMat<-NULL;
   }
+  
+  Data$conCount<-tempConCount
+  Data$canCount<-tempCanCount
+  rm(tempConCount, tempCanCount);
   
   #plot overlapping histogram of PCC
   print(paste("Outputting comparative ", method, " histogram:"));
