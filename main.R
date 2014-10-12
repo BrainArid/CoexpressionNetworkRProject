@@ -358,7 +358,7 @@ if(args$QCFlag)
 
 correlationHistogram <- function(data, method, breaks=100, file)
 {
-  corrMat <- cor(x=data, method=method, use="complete.obs");
+  corrMat <- cor(x=t(data), method=method, use="complete.obs");
   hist <- hist(x=corrMat,breaks=breaks,plot=FALSE);
   write.csv(x=corrMat,file=file);
   return(list(corrMat=corrMat, hist=hist));
