@@ -384,6 +384,7 @@ for(method in c("pearson","spearman"))
   {
     normalization = Data[[i]];
     name <- names(Data)[i];
+    print(paste("Calculating correlation histogram for ", name));
     profile <- correlationHistogram(data=Data[[i]], method=method, file=paste("Data/BRCA/", name,"_", method, "_",cutoff,"_int.txt"));
     density_data <- data.frame(cor=c(density_data$cor, profile$hist$mids),
     density=c(density_data$density, profile$hist$counts/sum(profile$hist$counts)),
