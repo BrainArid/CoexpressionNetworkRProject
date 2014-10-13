@@ -8,7 +8,8 @@
 #PBS -j oe
 
 cd ~/microArray_v_RNASeq
-module load R-3.0.2
+module load R-3.1.1
+module load gcc-4.5.2
 
 SCRIPT_DIR="CoexpressionNetworkRProject/"
 #DATA_DIR="Data/"

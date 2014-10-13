@@ -1,3 +1,3 @@
 #!/bin/bash
 
-qsub CoexpressionNetworkRProject/coexpressionNetwork.job -v ARGS="--diffCoexFlag=TRUE --diffEsprsFlag=FALSE --normFlagRPKM=TRUE --normFlagUbi=TRUE --normFlagDESeq=TRUE --normFlagQuant=TRUE --QCFlag=FALSE"
+qsub CoexpressionNetworkRProject/coexpressionNetwork.job -v ARGS="--diffCoexFlag=TRUE --diffEsprsFlag=FALSE --normFlagRPKM=TRUE --normFlagUbi=TRUE --normFlagDESeq=TRUE --normFlagQuant=TRUE --QCFlag=FALSE --dataFromRDS=TRUE"
