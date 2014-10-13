@@ -134,7 +134,7 @@ if(args$normFlagRPKM && is.null(Data$rs_RPKM))
     require(org.Hs.eg.db)
     exons.db = exonsBy(TxDb.Hsapiens.UCSC.hg19.knownGene, by='gene')    
     egs    = unlist(  mget(symbols[ symbols %in% keys(org.Hs.egSYMBOL2EG) ],org.Hs.egSYMBOL2EG) )
-    sapply(egs,function(eg)
+    egs <- sapply(egs,function(eg)
     {
       exons = exons.db[[eg]]
       if(is.null(exons))
@@ -416,13 +416,23 @@ for(method in c("pearson","spearman"))
 
 
   #coexpression networks direct comparison
-  maCorrMat <- cor(x=Data$ma, method=method, use="complete.obs");
-  rsCorrMat <- cor(x=Data$rs_DESeq, method=method, use="complete.obs");
+  maCorrMat <- cor(x=t(Data$ma), method=method, use="complete.obs");
+  rsCorrMat <- cor(x=t(Data$rs_DESeq), method=method, use="complete.obs");
 
   if(args$diffCoexFlag)
   {
     print("Calculating differential coexpression network.");
+
     diffCorrMat <- rsCorrMat - maCorrMat
+    
+    printMatInfo <- function(mat, name)
+    {
+      print(paste("About ", name, ":\n\tDim: ", dim(mat),"\n\tHead:", head(mat)));
+    }
+    printMatInfo(rsCorrMat, "rsCorrMat");
+    printMatInfo(maCorrMat, "maCorrMat");
+    printMatInfo(diffCorrMat, "rsCorrMat-maCorrMat");
+    
     write.csv(x=diffCorrMat,file=paste("Data/BRCA/Differential Network ",method,".txt"));
     #calc histogram
     hist <- hist(x=diffCorrMat,breaks=100,plot=FALSE);
