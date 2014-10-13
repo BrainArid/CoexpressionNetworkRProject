@@ -426,14 +426,6 @@ for(method in c("pearson","spearman"))
 
     diffCorrMat <- rsCorrMat - maCorrMat
     
-    printMatInfo <- function(mat, name)
-    {
-      print(paste("About ", name, ":\n\tDim: ", dim(mat),"\n\tHead:", head(mat)));
-    }
-    printMatInfo(rsCorrMat, "rsCorrMat");
-    printMatInfo(maCorrMat, "maCorrMat");
-    printMatInfo(diffCorrMat, "rsCorrMat-maCorrMat");
-    
     write.csv(x=diffCorrMat,file=paste("Data/BRCA/Differential Network ",method,".txt"));
     #calc histogram
     hist <- hist(x=diffCorrMat,breaks=100,plot=FALSE);
