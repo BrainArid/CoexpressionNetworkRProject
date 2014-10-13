@@ -142,7 +142,7 @@ if(args$normFlagRPKM && is.null(Data$rs_RPKM))
       exons = reduce(exons)
       sum( width(exons) )
     })
-    return (as.numeric(egs));
+    return (egs);
   }
   rpkm <- function(expMatrix)
   {
@@ -150,11 +150,12 @@ if(args$normFlagRPKM && is.null(Data$rs_RPKM))
     #C = Number of reads mapped to a gene
     #N = Total mapped reads in the experiment
     #L = gene length in base-pairs for a gene
-    lengths <- hg19GeneLengths(row.names(expMatrix));
-    I<- intersect(names(lengths),row.names(expMatrix));
+    symbols <- row.names(expMatrix);
+    lengths <- hg19GeneLengths(symbols);
+    I<- intersect(names(lengths),symbols);
     expMatrix <- expMatrix[I,];
     lengths <- lengths[I];
-    rpkmMat <- apply(X=expMatrix,MARGIN=2,FUN=function(x){return(x/sum(x))})
+    rpkmMat <- apply(X=expMatrix,MARGIN=2,FUN=function(X){return(X/sum(X))})
     rpkmMat <- 10^9 * rpkmMat 
     rpkmMat <- rpkmMat / as.numeric(lengths);
     return(rpkmMat);
