@@ -1,9 +1,9 @@
-plot2Groups <- function(GroupA, GroupB, byRow=TRUE, main="Mean Plot", xlab="Group A", ylab="Group B", file=NA, histA=FALSE, histB=FALSE)
+plot2Groups <- function(GroupA, GroupB, byRow=TRUE, main="Mean Plot", xlab="Group A", ylab="Group B", file=NA, histA=FALSE, histB=FALSE,breaksA=100,breaksB=100)
 {
-  if(!is.na(file))
+  #if(!is.na(file))
     png(filename=file);
   
-  a <- hist(GroupB)
+  a <- hist(GroupB,breaks=breaksB)
   
   if(histA && histB)
   {
@@ -15,7 +15,7 @@ plot2Groups <- function(GroupA, GroupB, byRow=TRUE, main="Mean Plot", xlab="Grou
   }
   else if(histB)
   {
-    a <- hist(GroupB)
+    a <- hist(GroupB,breaks=breaksB)
     layout(matrix(c(2,1,1,1), 1, 4, byrow = FALSE))
   }
 
@@ -26,17 +26,21 @@ plot2Groups <- function(GroupA, GroupB, byRow=TRUE, main="Mean Plot", xlab="Grou
   
   if(histA)
   {
-    hist(GroupA);
+    hist(GroupA,breaks=breaksA);
   }
   if(histB)
   {
     ##hist(GroupB);
     
-    barplot(a$counts, space=0, horiz=TRUE)
+    barplot(height=a$counts,width=1, space=0, horiz=TRUE)
     width <- a$breaks[2] - a$breaks[1]
     axis(2, at=(pretty(a$breaks) - a$breaks[1])/width,labels=pretty(a$breaks))
   }
-  
+    if(histA && histB)
+    {
+      dev.off()
+    }
+    
   #if(!is.na(file))
     dev.off();
 }

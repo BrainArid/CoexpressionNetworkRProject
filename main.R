@@ -8,20 +8,20 @@
 print("Library Paths:");
 .libPaths();
 
-print(paste("Current working directory: ", getwd()));
+print(paste0("Current working directory: ", getwd()));
 print("Changing Current working directory.")
 
 #setwd("C:/Users/Student/My Research/microArray v RNA Seq/");
 setwd("/home/barand/microArray_v_RNASeq/")
 
-print(paste("Current working directory: ", getwd()));
+print(paste0("Current working directory: ", getwd()));
 
 source("http://bioconductor.org/biocLite.R");
 
 #read in arguments
 print("Reading in command line arguments.");
 args <- commandArgs(trailingOnly = TRUE);
-print(paste("commandArgs: ",args));
+print(paste0("commandArgs: ",args));
 
 if(length(args) > 0)
 {
@@ -73,10 +73,10 @@ if(args$dataFromRDS)
 } else
 {
   print("Reading original TCGA data");
-  maControlFiles <- paste(sep='', maDir ,as.character(metaData[metaData[,"control"] & metaData[,"Platform.Type"]=="Expression-Genes" ,"File.Name"]));
-  maCancerFiles <- paste(sep='', maDir ,as.character(metaData[!metaData[,"control"] & metaData[,"Platform.Type"]=="Expression-Genes" ,"File.Name"]));
-  rsControlFiles <- paste(sep='', rsDir ,as.character(metaData[metaData[,"control"] & metaData[,"Platform.Type"]=="RNASeqV2" & grepl(x=metaData[,"File.Name"], pattern="*.rsem.genes.results") ,"File.Name"]));
-  rsCancerFiles <- paste(sep='', rsDir ,as.character(metaData[!metaData[,"control"] & metaData[,"Platform.Type"]=="RNASeqV2" & grepl(x=metaData[,"File.Name"], pattern="*.rsem.genes.results") ,"File.Name"]));
+  maControlFiles <- paste0(sep='', maDir ,as.character(metaData[metaData[,"control"] & metaData[,"Platform.Type"]=="Expression-Genes" ,"File.Name"]));
+  maCancerFiles <- paste0(sep='', maDir ,as.character(metaData[!metaData[,"control"] & metaData[,"Platform.Type"]=="Expression-Genes" ,"File.Name"]));
+  rsControlFiles <- paste0(sep='', rsDir ,as.character(metaData[metaData[,"control"] & metaData[,"Platform.Type"]=="RNASeqV2" & grepl(x=metaData[,"File.Name"], pattern="*.rsem.genes.results") ,"File.Name"]));
+  rsCancerFiles <- paste0(sep='', rsDir ,as.character(metaData[!metaData[,"control"] & metaData[,"Platform.Type"]=="RNASeqV2" & grepl(x=metaData[,"File.Name"], pattern="*.rsem.genes.results") ,"File.Name"]));
   
   source("CoexpressionNetworkRProject/constructCrossSampleFrame.R");
   Data <- list();
@@ -115,6 +115,7 @@ if(args$dataFromRDS)
   
   Data$rs_raw <- matrix(data=mapply(x=as.matrix(Data$rs_raw), FUN=as.integer),nrow = dim(Data$rs_raw)[1],ncol=dim(Data$rs_raw)[2],dimnames = list(row.names(Data$rs_raw), colnames(Data$rs_raw)));
 }
+
 #normalize
 print("Begin normalization:")
 
@@ -186,7 +187,7 @@ if(args$normFlagDESeq && is.null(Data$rs_DESeq))
     resOrdered <- res[order(res$padj),];  
     head(resOrdered);
     n <- 150;
-    write.csv(resOrdered,file=paste("DiffExpression DesSEQ.csv"),quote=FALSE,);
+    write.csv(resOrdered,file=paste0("DiffExpression DesSEQ.csv"),quote=FALSE,);
     rm(resOrdered);
   }
   Data$rs_DESeq <- t( t(counts(dds)) / sizeFactors(dds) );
@@ -239,12 +240,12 @@ if(args$diffExprsFlag)
   library("limma");
   
   condition=c(rep(x="control",times=Data$conCount), rep(x="cancer", times=Data$canCount));
-  combn <- factor(paste(pData(phenoData)[,1], pData(phenoData)[,2], sep = "_"));
+  #combn <- factor(paste(pData(phenoData)[,1], pData(phenoData)[,2], sep = "_"));
   design <- model.matrix(~condition);# describe model to be fit
   
   fit <- lmFit(Data$ma, design);# fit each probeset to model
   efit <- eBayes(fit);# empirical Bayes adjustment
-  write.csv(topTable(efit, coef=2, number=length(efit$p.value)), file=paste("DiffExpression MicroArray.csv"),quote=FALSE);
+  write.csv(topTable(efit, coef=2, number=length(efit$p.value)), file=paste0("DiffExpression MicroArray.csv"),quote=FALSE);
 
   #significance comparison
   maPRank <- rank(efit$p.value[,2]);
@@ -317,6 +318,8 @@ if(args$diffExprsFlag)
   cutoff <- "allGenes";
 }
 
+library("ggplot2"); 
+
 if(args$QCFlag)
 {
   print("Outputing quality control figures:");
@@ -324,8 +327,43 @@ if(args$QCFlag)
   maRankData<-apply(maGenes,MARGIN=2,FUN=rank);
   rsRankData<-apply(rsGenes,MARGIN=2,FUN=rank);
   
+  #expression value histograms before and after normalization
+  #temporarily move Data$conCount and Data$canCount
+  tempConCount <- Data$conCount
+  tempCanCount <- Data$canCount
+  Data$conCount<-NULL
+  Data$canCount<-NULL
+  
+  for(i in 1:length(Data))
+  {
+    normalization = Data[[i]];
+    name <- names(Data)[i];
+    print(paste0("Calculating correlation histogram for ", name));
+    hist <- hist(x=normalization,breaks=breaks,plot=FALSE);
+    density_data <- data.frame(exp=c(density_data$cor, profile$hist$mids),
+                               density=c(density_data$density, profile$hist$counts/sum(profile$hist$counts)),
+                               method=c(density_data$method, rep(x = name, times=length(profile$hist$counts))),stringsAsFactors=FALSE);
+    profile$corrMat<-NULL;
+    print(paste0("\tTotal Hist counts: ", sum(profile$hist$counts)))
+    print(paste0("\tNum genes: ", dim(Data[[i]])[1]))
+  }
+  
+  Data$conCount<-tempConCount
+  Data$canCount<-tempCanCount
+  rm(tempConCount, tempCanCount);
+  
+  #plot overlapping histogram of expression
+  print(paste0("Outputting comparative ", method, " histogram:"));
+  
+  # Density plots
+  
+  ggplot(data=density_data, aes(x=cor, y=density, group=method, colour=method)) + 
+    geom_line(size=1, aes(linetype=method)) +
+    ggtitle(paste0(method, " density comparison"));
+  ggsave(paste0("Comparative density of network ", method, ".png"));
+  
   #plot means
-  source("CoexpressionNetworkProject/plot2Groups.R");
+  source("CoexpressionNetworkRProject/plot2Groups.R");
   
   plot2Groups(rowMeans(Data$ma, na.rm = TRUE), log(rowMeans(Data$rs_DESeq, na.rm = TRUE)),main="Micro Array vs RNASeq DESeq gene means (97 paired patient samples)",xlab="Lowess Normalized MicroArray",ylab="Log RNASeq DEseq counts", file="Comp_gene_means_across_tech_DESeq.png", histA=TRUE, histB=TRUE);
   plot2Groups(apply(Data$ma,1,median, na.rm = TRUE), apply(log(Data$rs_DESeq),1,median, na.rm = TRUE),main="Micro Array vs RNASeq DESeq gene medians (91 paired patient samples)",xlab="Lowess Normalized MicroArray",ylab="Log RNASeq DESeq counts", file="Comp_gene_medians_across_tech_DESeq.png", histA=TRUE, histB=TRUE);
@@ -366,11 +404,10 @@ correlationHistogram <- function(data, method, breaks=100, file)
 }
 
 library("igraph");
-library("ggplot2"); 
 
 for(method in c("pearson","spearman"))
 {
-  print(paste("Computing ", method, " correlation for:"));
+  print(paste0("Computing ", method, " correlation for:"));
 
   print("Constructing correlation matricies");
   print("Calculating Microarray correlation matrix:");
@@ -381,20 +418,19 @@ for(method in c("pearson","spearman"))
   tempCanCount <- Data$canCount
   Data$conCount<-NULL
   Data$canCount<-NULL
-  Data$rs_RPKM<-NULL#############TEMP remove this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   
   for(i in 1:length(Data))
   {
     normalization = Data[[i]];
     name <- names(Data)[i];
-    print(paste("Calculating correlation histogram for ", name));
-    profile <- correlationHistogram(data=Data[[i]], method=method, file=paste("Data/BRCA/", name,"_", method, "_",cutoff,"_int.txt"));
+    print(paste0("Calculating correlation histogram for ", name));
+    profile <- correlationHistogram(data=Data[[i]], method=method, file=paste0("Data/BRCA/", name,"_", method, "_",cutoff,"_int.txt"));
     density_data <- data.frame(cor=c(density_data$cor, profile$hist$mids),
     density=c(density_data$density, profile$hist$counts/sum(profile$hist$counts)),
     method=c(density_data$method, rep(x = name, times=length(profile$hist$counts))),stringsAsFactors=FALSE);
     profile$corrMat<-NULL;
-    print(paste("\tTotal Hist counts: ", sum(profile$hist$counts)))
-    print(paste("\tNum genes: ", dim(Data[[i]])[1]))
+    print(paste0("\tTotal Hist counts: ", sum(profile$hist$counts)))
+    print(paste0("\tNum genes: ", dim(Data[[i]])[1]))
   }
   
   Data$conCount<-tempConCount
@@ -402,15 +438,15 @@ for(method in c("pearson","spearman"))
   rm(tempConCount, tempCanCount);
   
   #plot overlapping histogram of PCC
-  print(paste("Outputting comparative ", method, " histogram:"));
+  print(paste0("Outputting comparative ", method, " histogram:"));
 
   # Density plots
 
  # png(filename=);
   ggplot(data=density_data, aes(x=cor, y=density, group=method, colour=method)) + 
     geom_line(size=1, aes(linetype=method)) +
-    ggtitle(paste(method, " density comparison"));
-  ggsave(paste("Comparative density of network ", method, ".png"));
+    ggtitle(paste0(method, " density comparison"));
+  ggsave(paste0("Comparative density of network ", method, ".png"));
   #dev.off();
   
   rm(density_data);
@@ -426,17 +462,17 @@ for(method in c("pearson","spearman"))
 
     diffCorrMat <- rsCorrMat - maCorrMat
     
-    write.csv(x=diffCorrMat,file=paste("Data/BRCA/Differential Network ",method,".txt"));
+    write.csv(x=diffCorrMat,file=paste0("Data/BRCA/Differential Network ",method,".txt"));
     #calc histogram
     hist <- hist(x=diffCorrMat,breaks=100,plot=FALSE);
     density_data = data.frame("cor"=hist$mids,"density"=hist$counts/sum(hist$counts),"method"=rep(x="diff",times=length(hist$counts)));
     
     #output density distribution
-    #png(filename=paste("Differential Network ", method, " density.png"));
+    #png(filename=paste0("Differential Network ", method, " density.png"));
     ggplot(data=density_data, aes(x=cor, y=density, group=method, colour=method)) + 
       geom_line(size=1, aes(linetype=method)) +
-      ggtitle(paste("Density of ", method,"(rs) - ", method,"(ma)"));
-    ggsave(paste("Differential Network ", method, " density.png"));
+      ggtitle(paste0("Density of ", method,"(rs) - ", method,"(ma)"));
+    ggsave(paste0("Differential Network ", method, " density.png"));
     #dev.off();
     
     rm(density_data, hist);
@@ -457,7 +493,7 @@ for(method in c("pearson","spearman"))
   }
 
   print("Outputting microArray iGraph.");
-  write.graph(maGraph, file=paste(method, "_maGraph_", cutoff, ".graphml"), format="graphml" );
+  write.graph(maGraph, file=paste0(method, "_maGraph_", cutoff, ".graphml"), format="graphml" );
   rm(maGraph);
 
   print("Constructing RNASeq iGraph.");
@@ -471,7 +507,7 @@ for(method in c("pearson","spearman"))
   }
 
   print("Outputting RNASeq iGraph");
-  write.graph(rsGraph, file=paste(method, "_rsGraph_", cutoff, ".graphml"), format="graphml" );
+  write.graph(rsGraph, file=paste0(method, "_rsGraph_", cutoff, ".graphml"), format="graphml" );
   rm(rsGraph);
 
   if(args$diffCoexFlag)
@@ -489,7 +525,7 @@ for(method in c("pearson","spearman"))
       #V(diffGraph)[i]$MA_p <- efit.p.adj[name];
     }
     print("Outputting differential coexpression iGraph");
-    write.graph(diffGraph, file=paste(method, "_diffGraph_", cutoff, ".graphml"), format="graphml" );
+    write.graph(diffGraph, file=paste0(method, "_diffGraph_", cutoff, ".graphml"), format="graphml" );
     rm(diffGraph);
   }
 }
