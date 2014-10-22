@@ -254,7 +254,7 @@ if(args$diffExprsFlag)
   maPRank <- maPRank[sort(names(maPRank))];
   rsPRank <- rsPRank[sort(names(rsPRank))];
   plot2Groups(GroupA=maPRank, GroupB=rsPRank, xlab="MicroArray Rank", ylab="RNASeq Rank", main="DEG Rank comparison by p-value", file="Comp_DEG_pVal_rank_across_tech.png");
-  Rs_PRank <- cor(x=maPRank, y=rsPRank, method="spearman");
+  Rs_PRank <- cov(x=maPRank, y=rsPRank, method="spearman");
   rm(maPRank);
   rm(rsPRank);
   
@@ -268,7 +268,7 @@ if(args$diffExprsFlag)
   maFCRank <- maFCRank[sort(names(maFCRank))];
   rsFCRank <- rsFCRank[sort(names(rsFCRank))];
   plot2Groups(GroupA=maFCRank, GroupB=rsFCRank, xlab="MicroArray Rank", ylab="RNASeq Rank", main="Log2 Fold Change Rank comparison", file="Comp_FC_rank_across_tech.png");
-  Rs_FCRank <- cor(x=maFCRank, y=rsFCRank, method="spearman");
+  Rs_FCRank <- cov(x=maFCRank, y=rsFCRank, method="spearman");
   rm(maFCRank);
   rm(rsFCRank);
 }
@@ -397,7 +397,7 @@ if(args$QCFlag)
 
 correlationHistogram <- function(data, method, breaks=100, file)
 {
-  corrMat <- cor(x=t(data), method=method, use="complete.obs");
+  corrMat <- cov(x=t(data), method=method, use="complete.obs", na.action=na.omit);
   hist <- hist(x=corrMat,breaks=breaks,plot=FALSE);
   write.csv(x=corrMat,file=file);
   return(list(corrMat=corrMat, hist=hist));
@@ -453,8 +453,8 @@ for(method in c("pearson","spearman"))
 
 
   #coexpression networks direct comparison
-  maCorrMat <- cor(x=t(Data$ma), method=method, use="complete.obs");
-  rsCorrMat <- cor(x=t(Data$rs_DESeq), method=method, use="complete.obs");
+  maCorrMat <- cov(x=t(Data$ma), method=method, use="complete");
+  rsCorrMat <- cov(x=t(Data$rs_DESeq), method=method, use="complete");
 
   if(args$diffCoexFlag)
   {
