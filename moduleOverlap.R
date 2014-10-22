@@ -1,6 +1,6 @@
 setwd("/Users/Brian/Documents/Research/microArray v RNA Seq/BRCA/")
-maClusts <- read.table(file="maPearson_top12000_int.clusters.csv",sep = ",",stringsAsFactors = FALSE)
-rsClusts <- read.table(file="rsPearson_top12000_int.clusters.csv",sep = ",",stringsAsFactors = FALSE)
+maClusts <- read.table(file="Data//BRCA//maPearson_top12000_int.clusters.csv",sep = ",",stringsAsFactors = FALSE)
+rsClusts <- read.table(file="Data//BRCA//rsPearson_top12000_int.clusters.csv",sep = ",",stringsAsFactors = FALSE)
 maClusts <- maClusts[,-1];
 rsClusts <- rsClusts[,-1];
 countsMat <- matrix(nrow = dim(maClusts)[1], ncol= dim(rsClusts)[1]);
@@ -8,19 +8,15 @@ countsMat[,]<-0;
 
 for(i in 1:dim(maClusts)[1])
 {
-  print(paste("Cross comparing microarray row ", i, " of ", dim(maClusts)[1]));
-  row = maClusts[i,maClusts[i,]!=''];
-  for(r in 1:length(row))
+  for(j in 1:dim(rsClusts)[1])
   {
-    value = row[r];
-    for(j in 1:dim(rsClusts)[1])
-    {
-      rsClust <- rsClusts[j,rsClusts[j,]!='']
-      if(value %in% rsClust)
-      {
-        countsMat[i, j] = countsMat[i, j] + 1;
-      }
-    }
+    print(paste0("Cross comparing microarray row ", i, " of ", dim(maClusts)[1]," and column ", j, " of ", dim(rsClusts)[1]));
+    countsMat[i,j] <- length(intersect(maClusts[[i]],rsClusts[[j]]))
   }
-  print(paste("Found ", sum(countsMat[i,])));
 }
+
+maLengths <- mapply(maClusts, FUN=length)
+rsLengths <- mapply(rsClusts, FUN=length)
+
+library("ggplot2")
+
