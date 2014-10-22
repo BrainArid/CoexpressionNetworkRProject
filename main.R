@@ -166,6 +166,9 @@ if(args$normFlagRPKM && is.null(Data$rs_RPKM))
   }
   
   Data$rs_RPKM <- rpkm(Data$rs_raw);
+  Data$rs_RPKM <- Data$rs_RPKM[-which(rowSums(x=is.na(Data$rs_RPKM),dims=1)>0),]
+  Data$rs_RPKM <- Data$rs_RPKM[-which(rowSums(x=is.infinite(Data$rs_RPKM),dims=1)>0),]
+  Data$rs_RPKM <- Data$rs_RPKM[-which(rowSums(x=is.nan(Data$rs_RPKM),dims=1)>0),]
 }
 
 #DESeq variance stableizing transformation (VST) normalization
