@@ -140,13 +140,16 @@ args$outDir <- initializeStringArg(arg=args$outDir, default="out/");
 
 commonModules <-moduleOverlap(args$dir, args$clustsFile1, args$clustsFile2, args$outDir);
 
-unlistAndWrite <- function(x, index, file, append=TRUE, ncolumns=1000, sep="\t")
+unlistAndWrite <- function(x, index, file, append=TRUE, ncolumns=1000, sep=",")
 {
   write(unlist(x[[index]]),file,ncolumns=ncolumns,append = TRUE, sep=sep);
 }
-
+fileName<-paste0(args$outDir, clustsFile1, "_VS_", clustsFile2, "_MATCHING_MODULES.csv");
+write(paste0(args$clustsFile1, ",", args$clustsFile2),fileName,append=FALSE);#FALSE to clear file contents
+write(paste0("number of matching modules:,",length(commonModules[[1]])),fileName,append=TRUE);
+write("X1 index,X2 index,r,g,b",fileName,append=TRUE);
 for(i in 1:length(commonModules[[1]]))
 {
-  lapply(commonModules, unlistAndWrite, i, paste0(args$outDir, clustsFile1, "_VS_", clustsFile2, "_MATCHING_MODULES.csv"));
+  lapply(commonModules, unlistAndWrite, i, fileName);
 }
 
