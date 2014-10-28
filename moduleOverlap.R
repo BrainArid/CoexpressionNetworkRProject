@@ -77,22 +77,26 @@ moduleOverlap <- function(dir, clustsFile1, clustsFile2, outDir)
   ggsave(filename = paste0(outDir, clustsFile1, "_VS_", clustsFile2, "_COMPOSITE.png"),plot = p)
   
   #list white tiles:
-  x <- colMat.m[colMat.m$r>.8 & colMat.m$g>.8 & colMat.m$b>.8,]$X1
-  y <- colMat.m[colMat.m$r>.8 & colMat.m$g>.8 & colMat.m$b>.8,]$X2
-  
-  commonModules <- list();
-  commonModules$profiles <- list();
-  commonModules$clusts1 <- list();
-  commonModules$clusts2 <- list();
-  for(i in 1:length(x))
+  if(dim(colMat.m[colMat.m$r>.8 & colMat.m$g>.8 & colMat.m$b>.8,])[1]>0)
   {
-    commonModules$profiles[i] <- list(colMat.m[colMat.m$X1==x[i] & colMat.m$X2==y[i],c("X1","X2","r","g","b")]);
-    commonModules$clusts1[i] <- list(clusts1[x[i],clusts1[x[i],]!=""])
-    commonModules$clusts2[i] <- list(clusts2[y[i],clusts2[y[i],]!=""])
+    x <- colMat.m[colMat.m$r>.8 & colMat.m$g>.8 & colMat.m$b>.8,]$X1
+    y <- colMat.m[colMat.m$r>.8 & colMat.m$g>.8 & colMat.m$b>.8,]$X2
+    
+    commonModules <- list();
+    commonModules$profiles <- list();
+    commonModules$clusts1 <- list();
+    commonModules$clusts2 <- list();
+    for(i in 1:length(x))
+    {
+      commonModules$profiles[i] <- list(colMat.m[colMat.m$X1==x[i] & colMat.m$X2==y[i],c("X1","X2","r","g","b")]);
+      commonModules$clusts1[i] <- list(clusts1[x[i],clusts1[x[i],]!=""])
+      commonModules$clusts2[i] <- list(clusts2[y[i],clusts2[y[i],]!=""])
+    }
+    
+    #and thier profiles:
+    return(commonModules);
   }
-  
-  #and thier profiles:
-  return(commonModules);
+  return(NULL)
 }
 
 print("Reading in command line arguments.");
@@ -147,18 +151,22 @@ getwd();
 
 commonModules <-moduleOverlap(args$dir, args$clustsFile1, args$clustsFile2, args$outDir);
 
-print(commonModules);
-
-unlistAndWrite <- function(x, index, file, append=TRUE, ncolumns=1000, sep=",")
-{
-  write(unlist(x[[index]]),file,ncolumns=ncolumns,append = TRUE, sep=sep);
-}
 fileName<-paste0(args$outDir, clustsFile1, "_VS_", clustsFile2, "_MATCHING_MODULES.csv");
-write(paste0(args$clustsFile1, ",", args$clustsFile2),fileName,append=FALSE);#FALSE to clear file contents
-write(paste0("number of matching modules:,",length(commonModules[[1]])),fileName,append=TRUE);
-write("X1 index,X2 index,r,g,b",fileName,append=TRUE);
-for(i in 1:length(commonModules[[1]]))
+if(is.null(commonModules))
 {
-  lapply(commonModules, unlistAndWrite, i, fileName);
+  write("No consensus.",fileName);
+} else 
+{
+  unlistAndWrite <- function(x, index, file, append=TRUE, ncolumns=1000, sep=",")
+  {
+    write(unlist(x[[index]]),file,ncolumns=ncolumns,append = TRUE, sep=sep);
+  }
+  
+  write(paste0(args$clustsFile1, ",", args$clustsFile2),fileName,append=FALSE);#FALSE to clear file contents
+  write(paste0("number of matching modules:,",length(commonModules[[1]])),fileName,append=TRUE);
+  write("X1 index,X2 index,r,g,b",fileName,append=TRUE);
+  for(i in 1:length(commonModules[[1]]))
+  {
+    lapply(commonModules, unlistAndWrite, i, fileName);
+  }
 }
-
