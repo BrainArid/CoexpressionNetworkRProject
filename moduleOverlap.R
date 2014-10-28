@@ -104,13 +104,12 @@ if(length(args) > 0)
   #Parse arguments (we expec the form --argName=argValue)
   parseArgs <- function (x) 
   {
-    s<- strsplit(sub("^--","",x), "=");
+    s<- unlist(strsplit(sub("^--","",x), "="));
     return(list(V1=s[1],V2=paste(s[-1],collapse = "=")))
   }
-  argsDF <- as.data.frame(do.call("rbind", parseArgs(args)));
-  args <- as.character(argsDF$V2)
-  names(args) <- argsDF$V1
-  rm(argsDF);
+  argsDF <- as.data.frame(do.call("rbind", lapply(X = args,FUN = parseArgs)));
+  args <- argsDF$V2
+  rm(argsDF)
 }
 args<- as.list(args);
 
@@ -137,9 +136,10 @@ initializeStringArg <- function(arg, default){
   return(arg);
 }
 
+args<-list();
 args$dir <- initializeStringArg(arg=args$dir, default="./");
-args$clustsFile1 <- initializeStringArg(arg=args$clustsFile1, default="clusts1.modules");
-args$clustsFile2 <- initializeStringArg(arg=args$clustsFile2, default="clusts2.modules");
+args$clustsFile1 <- initializeStringArg(arg=args$clustsFile1, default="ma_pearson_allGenes_int.txtg=0.90.modules");
+args$clustsFile2 <- initializeStringArg(arg=args$clustsFile2, default="rs_DESeq_spearman_allGenes_int.txtg=0.60.modules");
 args$outDir <- initializeStringArg(arg=args$outDir, default="out/");
 
 commonModules <-moduleOverlap(args$dir, args$clustsFile1, args$clustsFile2, args$outDir);
