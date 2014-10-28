@@ -151,7 +151,7 @@ getwd();
 
 commonModules <-moduleOverlap(args$dir, args$clustsFile1, args$clustsFile2, args$outDir);
 
-fileName<-paste0(args$outDir, clustsFile1, "_VS_", clustsFile2, "_MATCHING_MODULES.csv");
+fileName<-paste0(args$outDir, args$clustsFile1, "_VS_", args$clustsFile2, "_MATCHING_MODULES.csv");
 if(is.null(commonModules))
 {
   write("No consensus.",fileName);
