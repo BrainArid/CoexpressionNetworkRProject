@@ -108,10 +108,12 @@ if(length(args) > 0)
     return(list(V1=s[1],V2=paste(s[-1],collapse = "=")))
   }
   argsDF <- as.data.frame(do.call("rbind", lapply(X = args,FUN = parseArgs)));
-  args <- argsDF$V2
+  args <- as.list(argsDF$V2)
+  names(args) <- argsDF$V1
   rm(argsDF)
 }
-args<- as.list(args);
+
+print(paste0("commandArgs: ",args));
 
 #initialize arguments if 
 initializeBooleanArg <- function(arg, default){
@@ -136,7 +138,7 @@ initializeStringArg <- function(arg, default){
   return(arg);
 }
 
-args<-list();
+print(args$clustsFile1);
 args$dir <- initializeStringArg(arg=args$dir, default="./");
 args$clustsFile1 <- initializeStringArg(arg=args$clustsFile1, default="ma_pearson_allGenes_int.txtg=0.90.modules");
 args$clustsFile2 <- initializeStringArg(arg=args$clustsFile2, default="rs_DESeq_spearman_allGenes_int.txtg=0.60.modules");
