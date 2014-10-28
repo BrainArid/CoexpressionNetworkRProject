@@ -138,7 +138,6 @@ initializeStringArg <- function(arg, default){
   return(arg);
 }
 
-print(args$clustsFile1);
 args$dir <- initializeStringArg(arg=args$dir, default="./");
 args$clustsFile1 <- initializeStringArg(arg=args$clustsFile1, default="ma_pearson_allGenes_int.txtg=0.90.modules");
 args$clustsFile2 <- initializeStringArg(arg=args$clustsFile2, default="rs_DESeq_spearman_allGenes_int.txtg=0.60.modules");
@@ -147,6 +146,7 @@ args$outDir <- initializeStringArg(arg=args$outDir, default="out/");
 getwd();
 
 commonModules <-moduleOverlap(args$dir, args$clustsFile1, args$clustsFile2, args$outDir);
+
 
 unlistAndWrite <- function(x, index, file, append=TRUE, ncolumns=1000, sep=",")
 {
