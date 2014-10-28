@@ -102,7 +102,11 @@ print(paste0("commandArgs: ",args));
 if(length(args) > 0)
 {
   #Parse arguments (we expec the form --argName=argValue)
-  parseArgs <- function (x) strsplit(sub("^--","",x), "=");
+  parseArgs <- function (x) 
+  {
+    s<- strsplit(sub("^--","",x), "=");
+    return(list(V1=s[1],V2=paste(s[-1],collapse = "=")))
+  }
   argsDF <- as.data.frame(do.call("rbind", parseArgs(args)));
   args <- as.character(argsDF$V2)
   names(args) <- argsDF$V1
