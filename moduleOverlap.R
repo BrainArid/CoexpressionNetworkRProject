@@ -147,6 +147,7 @@ getwd();
 
 commonModules <-moduleOverlap(args$dir, args$clustsFile1, args$clustsFile2, args$outDir);
 
+print(commonModules);
 
 unlistAndWrite <- function(x, index, file, append=TRUE, ncolumns=1000, sep=",")
 {
