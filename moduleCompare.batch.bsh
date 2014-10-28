@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CFILE1="ma_pearson_allGenes_int.txtg\=0.90.modules"
-CFILE2="rs_DESeq_spearman_allGenes_int.txtg\=0.60.modules"
+CFILE1="ma_pearson_allGenes_int.txtg=0.90.modules"
+CFILE2="rs_DESeq_spearman_allGenes_int.txtg=0.65.modules"
 
-qsub CoexpressionNetworkRProject/moduleCompare.job -v ARGS="--dir=Data/BRCA/modules/ --clustsFile1=${CFILE1} --clustsFile2=${CFILE2} --outDir=Data/BRCA/moduleComps/"
+qsub CoexpressionNetworkRProject/moduleCompare.job -v ARGS="--dir=/home/barand/microArray_v_RNASeq/Data/BRCA/modules/ --clustsFile1=${CFILE1} --clustsFile2=${CFILE2} --outDir=/home/barand/microArray_v_RNASeq/Data/BRCA/moduleComps/"
