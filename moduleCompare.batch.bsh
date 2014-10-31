@@ -2,5 +2,16 @@
 
 CFILE1="ma_pearson_allGenes_int.txtg=0.90.modules"
 CFILE2="rs_DESeq_spearman_allGenes_int.txtg=0.65.modules"
+THRESHOLD="0.65"
+DIR="/home/barand/microArray_v_RNASeq/Data/BRCA/modules/"
+OUT_DIR="/home/barand/microArray_v_RNASeq/Data/BRCA/moduleComps/threshold_0.65"
 
-qsub CoexpressionNetworkRProject/moduleCompare.job -v ARGS="--dir=/home/barand/microArray_v_RNASeq/Data/BRCA/modules/ --clustsFile1=${CFILE1} --clustsFile2=${CFILE2} --outDir=/home/barand/microArray_v_RNASeq/Data/BRCA/moduleComps/threshold_0.65 --threshold=0.65"
+for CFILE1 in /home/barand/microArray_v_RNASeq/Data/BRCA/modules/ma_pearson*
+do
+       for CFILE2 in /home/barand/microArray_v_RNASeq/Data/BRCA/modules/rs_DESeq_spearman*
+       do
+               CFILE1=${CFILE1/\/home\/barand\/microArray_v_RNASeq\/Data\/BRCA\/modules\//}
+               CFILE2=${CFILE2/\/home\/barand\/microArray_v_RNASeq\/Data\/BRCA\/modules\//}
+               qsub CoexpressionNetworkRProject/moduleCompare.job -v ARGS="--dir=${DIR} --clustsFile1=${CFILE1} --clustsFile2=${CFILE2} --outDir=${OUT_DIR} --threshold=${0.65}"
+       done
+done
