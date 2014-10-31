@@ -1,4 +1,4 @@
-moduleOverlap <- function(dir, clustsFile1, clustsFile2, outDir)
+moduleOverlap <- function(dir, clustsFile1, clustsFile2, outDir, threshold)
 {
   setwd(dir);#setwd("/Users/Brian/Documents/Research/microArray v RNA Seq/BRCA/")
   clusts1 <- read.table(file=paste0(dir,clustsFile1),sep = ",",stringsAsFactors = FALSE,fill = TRUE)
@@ -77,10 +77,10 @@ moduleOverlap <- function(dir, clustsFile1, clustsFile2, outDir)
   ggsave(filename = paste0(outDir, clustsFile1, "_VS_", clustsFile2, "_COMPOSITE.png"),plot = p)
   
   #list white tiles:
-  if(dim(colMat.m[colMat.m$r>.8 & colMat.m$g>.8 & colMat.m$b>.8,])[1]>0)
+  if(dim(colMat.m[colMat.m$r>threshold & colMat.m$g>threshold & colMat.m$b>threshold,])[1]>0)
   {
-    x <- colMat.m[colMat.m$r>.8 & colMat.m$g>.8 & colMat.m$b>.8,]$X1
-    y <- colMat.m[colMat.m$r>.8 & colMat.m$g>.8 & colMat.m$b>.8,]$X2
+    x <- colMat.m[colMat.m$r>threshold & colMat.m$g>threshold & colMat.m$b>threshold,]$X1
+    y <- colMat.m[colMat.m$r>threshold & colMat.m$g>threshold & colMat.m$b>threshold,]$X2
     
     commonModules <- list();
     commonModules$profiles <- list();
@@ -142,14 +142,26 @@ initializeStringArg <- function(arg, default){
   return(arg);
 }
 
+initializeIntArg <- function(arg, default){
+  if(is.null(arg))
+  {
+    arg <- default;
+  } else if(!is.integer(arg))
+  {
+    arg <- as.integer(arg);
+  }
+  return(arg);
+}
+
 args$dir <- initializeStringArg(arg=args$dir, default="./");
 args$clustsFile1 <- initializeStringArg(arg=args$clustsFile1, default="ma_pearson_allGenes_int.txtg=0.90.modules");
 args$clustsFile2 <- initializeStringArg(arg=args$clustsFile2, default="rs_DESeq_spearman_allGenes_int.txtg=0.60.modules");
 args$outDir <- initializeStringArg(arg=args$outDir, default="out/");
+args$threshold <- initializeIntArg(arg=args$threshold, default=0.70);
 
 getwd();
 
-commonModules <-moduleOverlap(args$dir, args$clustsFile1, args$clustsFile2, args$outDir);
+commonModules <-moduleOverlap(args$dir, args$clustsFile1, args$clustsFile2, args$outDir, args$threshold);
 
 fileName<-paste0(args$outDir, args$clustsFile1, "_VS_", args$clustsFile2, "_MATCHING_MODULES.csv");
 if(is.null(commonModules))
