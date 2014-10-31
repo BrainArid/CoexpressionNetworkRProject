@@ -12,6 +12,6 @@ do
        do
                CFILE1=${CFILE1/\/home\/barand\/microArray_v_RNASeq\/Data\/BRCA\/modules\//}
                CFILE2=${CFILE2/\/home\/barand\/microArray_v_RNASeq\/Data\/BRCA\/modules\//}
-               qsub CoexpressionNetworkRProject/moduleCompare.job -v ARGS="--dir=${DIR} --clustsFile1=${CFILE1} --clustsFile2=${CFILE2} --outDir=${OUT_DIR} --threshold=${0.65}"
+               qsub CoexpressionNetworkRProject/moduleCompare.job -v ARGS="--dir=${DIR} --clustsFile1=${CFILE1} --clustsFile2=${CFILE2} --outDir=${OUT_DIR} --threshold=${THRESHOLD}"
        done
 done
