@@ -1,10 +1,11 @@
-moduleOverlap <- function(dir, clustsFile1, clustsFile2, outDir, threshold)
+moduleOverlap <- function(dir, clustsFile1, clustsFile2, outDir, threshold, clustHeatMap)
 {
   setwd(dir);#setwd("/Users/Brian/Documents/Research/microArray v RNA Seq/BRCA/")
   clusts1 <- read.table(file=paste0(dir,clustsFile1),sep = ",",stringsAsFactors = FALSE,fill = TRUE)
   clusts2 <- read.table(file=paste0(dir,clustsFile2),sep = ",",stringsAsFactors = FALSE,fill = TRUE)
-  #clusts1 <- clusts1[,-1];
-  #clusts2 <- clusts2[,-1];
+  #remove any columns containing NAs
+  clusts1 <- clusts1[,colSums(is.na(clusts1))==0]
+  clusts2 <- clusts2[,colSums(is.na(clusts2))==0]
   countsMat <- matrix(nrow = dim(clusts1)[1], ncol= dim(clusts2)[1]);
   countsMat[,]<-0;
   rMat <- matrix(nrow = dim(clusts1)[1], ncol= dim(clusts2)[1]);
@@ -51,30 +52,36 @@ moduleOverlap <- function(dir, clustsFile1, clustsFile2, outDir, threshold)
   countsMat.m <- countsMat.m[with(countsMat.m, order(X1, X2)), ]
   countRange <- range(countsMat);
   #countsMat.m <- ddply(countsMat.m, c("value"), transform, rescale = rescale(value,to = c(0,1),from=countRange))
-  p <- ggplot(countsMat.m, aes(y=X1, x=X2)) + geom_tile(aes(y=X1, x=X2, fill = rescale), colour = "black") + scale_fill_gradient(low = "black", high = "white")
+  #p <- ggplot(countsMat.m, aes(y=X1, x=X2)) + geom_tile(aes(y=X1, x=X2, fill = rescale), colour = "black") + scale_fill_gradient(low = "black", high = "white")
   
   rMat.m <- melt(rMat)
   rMat.m <- rMat.m[with(rMat.m, order(X1, X2)), ]
-  countRange <- range(rMat);
+  #countRange <- range(rMat);
   #rMat.m <- ddply(rMat.m, c("value"), transform, rescale = rescale(value,to = c(0,1),from=countRange))
-  p <- ggplot(rMat.m, aes(y=X1, x=X2)) + geom_tile(aes(y=X1,x=X2,fill = rgb(red = value,green=0,blue=0)), colour = "black")+scale_fill_identity();
+  #p <- ggplot(rMat.m, aes(y=X1, x=X2)) + geom_tile(aes(y=X1,x=X2,fill = rgb(red = value,green=0,blue=0)), colour = "black")+scale_fill_identity();
   
   gMat.m <- melt(gMat)
   gMat.m <- gMat.m[with(gMat.m, order(X1, X2)), ]
-  countRange <- range(gMat);
+  #countRange <- range(gMat);
   #gMat.m <- ddply(gMat.m, c("value"), transform, rescale = rescale(value,to = c(0,1),from=countRange))
-  p <- ggplot(gMat.m, aes(y=X1, x=X2)) + geom_tile(aes(y=X1,x=X2,fill = rgb(red = 0,green=value,blue=0)), colour = "black")+scale_fill_identity();
-  ggsave(filename = paste0(outDir, clustsFile1, "_VS_", clustsFile2, "_INTERSECT.png"),plot = p)
+  if(clustHeatMap)
+  {
+    p <- ggplot(gMat.m, aes(y=X1, x=X2)) + geom_tile(aes(y=X1,x=X2,fill = rgb(red = 0,green=value,blue=0)), colour = "black")+scale_fill_identity();
+    ggsave(filename = paste0(outDir, clustsFile1, "_VS_", clustsFile2, "_INTERSECT.png"),plot = p)
+  }
   
   bMat.m <- melt(bMat)
   bMat.m <- bMat.m[with(bMat.m, order(X1, X2)), ]
-  countRange <- range(bMat);
+  #countRange <- range(bMat);
   #bMat.m <- ddply(bMat.m, c("value"), transform, rescale = rescale(value,to = c(0,1),from=countRange))
-  p <- ggplot(bMat.m, aes(y=X1, x=X2)) + geom_tile(aes(y=X1,x=X2,fill = rgb(red = 0,green=0,blue=value)), colour = "black")+scale_fill_identity();
+  #p <- ggplot(bMat.m, aes(y=X1, x=X2)) + geom_tile(aes(y=X1,x=X2,fill = rgb(red = 0,green=0,blue=value)), colour = "black")+scale_fill_identity();
   
   colMat.m <- data.frame(X1=rMat.m$X1,X2=rMat.m$X2,r=rMat.m$value,g=gMat.m$value,b=bMat.m$value)
-  p <- ggplot(colMat.m, aes(y=X1, x=X2)) + geom_tile(aes(y=X1,x=X2,fill = rgb(red = r,green=g,blue=b)), colour = "black")+scale_fill_identity();
-  ggsave(filename = paste0(outDir, clustsFile1, "_VS_", clustsFile2, "_COMPOSITE.png"),plot = p)
+  if(clustHeatMap)
+  {
+    p <- ggplot(colMat.m, aes(y=X1, x=X2)) + geom_tile(aes(y=X1,x=X2,fill = rgb(red = r,green=g,blue=b)), colour = "black")+scale_fill_identity();
+    ggsave(filename = paste0(outDir, clustsFile1, "_VS_", clustsFile2, "_COMPOSITE.png"),plot = p)
+  }
   
   #list white tiles:
   if(dim(colMat.m[colMat.m$r>threshold & colMat.m$g>threshold & colMat.m$b>threshold,])[1]>0)
@@ -115,6 +122,9 @@ if(length(args) > 0)
   args <- as.list(argsDF$V2)
   names(args) <- argsDF$V1
   rm(argsDF)
+} else
+{
+  args <- list();
 }
 
 print(paste0("commandArgs: ",args));
@@ -158,10 +168,9 @@ args$clustsFile1 <- initializeStringArg(arg=args$clustsFile1, default="ma_pearso
 args$clustsFile2 <- initializeStringArg(arg=args$clustsFile2, default="rs_DESeq_spearman_allGenes_int.txtg=0.60.modules");
 args$outDir <- initializeStringArg(arg=args$outDir, default="out/");
 args$threshold <- initializeIntArg(arg=args$threshold, default=0.70);
+args$clustHeatMap <- initializeBooleanArg(arg=args$clustHeatMat, default=FALSE);
 
-getwd();
-
-commonModules <-moduleOverlap(args$dir, args$clustsFile1, args$clustsFile2, args$outDir, args$threshold);
+commonModules <-moduleOverlap(args$dir, args$clustsFile1, args$clustsFile2, args$outDir, args$threshold, args$clustHeatMat);
 
 fileName<-paste0(args$outDir, args$clustsFile1, "_VS_", args$clustsFile2, "_MATCHING_MODULES.csv");
 if(is.null(commonModules))
