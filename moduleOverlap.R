@@ -170,7 +170,7 @@ args$outDir <- initializeStringArg(arg=args$outDir, default="out/");
 args$threshold <- initializeIntArg(arg=args$threshold, default=0.70);
 args$clustHeatMap <- initializeBooleanArg(arg=args$clustHeatMat, default=FALSE);
 
-commonModules <-moduleOverlap(args$dir, args$clustsFile1, args$clustsFile2, args$outDir, args$threshold, args$clustHeatMat);
+commonModules <-moduleOverlap(args$dir, args$clustsFile1, args$clustsFile2, args$outDir, args$threshold, args$clustHeatMap);
 
 fileName<-paste0(args$outDir, args$clustsFile1, "_VS_", args$clustsFile2, "_MATCHING_MODULES.csv");
 if(is.null(commonModules))
