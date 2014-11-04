@@ -86,6 +86,8 @@ moduleOverlap <- function(dir, clustsFile1, clustsFile2, outDir, threshold, clus
   #list white tiles:
   if(dim(colMat.m[colMat.m$r>threshold & colMat.m$g>threshold & colMat.m$b>threshold,])[1]>0)
   {
+    print(colMat.m[colMat.m$r>threshold & colMat.m$g>threshold & colMat.m$b>threshold,]);
+    
     x <- colMat.m[colMat.m$r>threshold & colMat.m$g>threshold & colMat.m$b>threshold,]$X1
     y <- colMat.m[colMat.m$r>threshold & colMat.m$g>threshold & colMat.m$b>threshold,]$X2
     
@@ -152,6 +154,17 @@ initializeStringArg <- function(arg, default){
   return(arg);
 }
 
+initializeFloatArg <- function(arg, default){
+  if(is.null(arg))
+  {
+    arg <- default;
+  } else if(!is.numeric(arg))
+  {
+    arg <- as.numeric(arg);
+  }
+  return(arg);
+}
+
 initializeIntArg <- function(arg, default){
   if(is.null(arg))
   {
@@ -167,8 +180,8 @@ args$dir <- initializeStringArg(arg=args$dir, default="./");
 args$clustsFile1 <- initializeStringArg(arg=args$clustsFile1, default="ma_pearson_allGenes_int.txtg=0.90.modules");
 args$clustsFile2 <- initializeStringArg(arg=args$clustsFile2, default="rs_DESeq_spearman_allGenes_int.txtg=0.60.modules");
 args$outDir <- initializeStringArg(arg=args$outDir, default="out/");
-args$threshold <- initializeIntArg(arg=args$threshold, default=0.70);
-args$clustHeatMap <- initializeBooleanArg(arg=args$clustHeatMat, default=FALSE);
+args$threshold <- initializeFloatArg(arg=args$threshold, default=0.70);
+args$clustHeatMap <- initializeBooleanArg(arg=args$clustHeatMap, default=FALSE);
 
 commonModules <-moduleOverlap(args$dir, args$clustsFile1, args$clustsFile2, args$outDir, args$threshold, args$clustHeatMap);
 
