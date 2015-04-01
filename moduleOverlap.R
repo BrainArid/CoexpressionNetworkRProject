@@ -155,7 +155,7 @@ initializeStringArg <- function(arg, default){
 }
 
 initializeFloatArg <- function(arg, default){
-  if(is.null(arg))
+  if(is.null(arg)) 
   {
     arg <- default;
   } else if(!is.numeric(arg))

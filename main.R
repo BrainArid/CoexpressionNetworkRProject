@@ -2,9 +2,9 @@
 #By: Brian Arand
 #September 2014
 
-#workingDirectories <- c("/home/barand/microArray_v_RNASeq/","C:/Users/Student/My Research/microArray v RNA Seq/");
-#for(wd in workingDirectories)
-#  setwd(wd);
+workingDirectories <- c("/home/barand/microArray_v_RNASeq/","C:/Users/Student/My Research/microArray v RNA Seq/");
+for(wd in workingDirectories)
+  if(file.exists(wd)){expr=setwd(wd)}
 print("Library Paths:");
 .libPaths();
 
